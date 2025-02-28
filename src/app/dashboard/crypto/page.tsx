@@ -5,7 +5,7 @@ import { ethers } from 'ethers';
 import ReactiveBuySell from '../../../contracts/ReactiveBuySell.json';
 import deploymentInfo from '../../../contracts/deployment.json';
 
-type SupportedCrypto = 'bitcoin' | 'ethereum';
+type SupportedCrypto = 'ethereum';
 
 interface DeploymentInfo {
   reactiveBuySell: {
@@ -16,7 +16,7 @@ interface DeploymentInfo {
 const typedDeploymentInfo = deploymentInfo as DeploymentInfo;
 
 const isSupportedCrypto = (str: string): str is SupportedCrypto => 
-  str === 'bitcoin' || str === 'ethereum';
+  str === 'ethereum';
 
 declare global {
   interface Window {
@@ -186,18 +186,41 @@ export default function CryptoPage() {
 
     try {
       const contract = contracts[crypto];
-      const thresholdData = await fetch(`http://127.0.0.1:8000/threshold/${crypto}`);
-      const { threshold } = await thresholdData.json() as ThresholdResponse;
-
       if (!monitoredCryptos[crypto]) {
         // Start monitoring
-        await contract.subscribe({
-          value: ethers.parseEther("0.0001") // Initial ETH for trading
-        });
-        await contract.updateThresholds(
-          ethers.parseUnits(threshold.buy.toString(), 18),
-          ethers.parseUnits(threshold.sell.toString(), 18)
-        );
+        try {
+          // Default thresholds if service is unavailable
+          let buyThreshold = 1800; // $1800 for ETH
+          let sellThreshold = 2200; // $2200 for ETH
+
+          try {
+            const thresholdData = await fetch(`http://127.0.0.1:8000/threshold/${crypto}`);
+            if (thresholdData.ok) {
+              const response = await thresholdData.json() as ThresholdResponse;
+              if (response.threshold?.buy && response.threshold?.sell) {
+                buyThreshold = response.threshold.buy;
+                sellThreshold = response.threshold.sell;
+              }
+            }
+          } catch (error) {
+            console.warn('Threshold service unavailable, using default thresholds:', error);
+          }
+
+          // First subscribe to the contract
+          await contract.subscribe({
+            value: ethers.parseEther("0.000001") // Initial ETH for trading
+          });
+
+          // Then update thresholds
+          await contract.updateThresholds(
+            ethers.parseUnits(buyThreshold.toString(), 18),
+            ethers.parseUnits(sellThreshold.toString(), 18)
+          );
+        } catch (error) {
+          console.error('Error starting monitoring:', error);
+          alert('Failed to start monitoring. Please check the threshold service is running and try again.');
+          return;
+        }
       } else {
         // Stop monitoring
         await contract.unsubscribe();
@@ -320,16 +343,42 @@ export default function CryptoPage() {
                     Analyze
                   </button>
                   {isSupported && account && (
-                    <button
-                      onClick={() => toggleMonitoring(crypto)}
-                      className={`px-4 py-2 rounded transition-colors ${
-                        monitoredCryptos[crypto]
-                          ? 'bg-red-600 hover:bg-red-700'
-                          : 'bg-green-600 hover:bg-green-700'
-                      } text-white`}
-                    >
-                      {monitoredCryptos[crypto] ? 'Stop Monitoring' : 'Monitor'}
-                    </button>
+                    <>
+                      <button
+                        onClick={() => toggleMonitoring(crypto)}
+                        className={`px-4 py-2 rounded transition-colors ${
+                          monitoredCryptos[crypto]
+                            ? 'bg-red-600 hover:bg-red-700'
+                            : 'bg-green-600 hover:bg-green-700'
+                        } text-white`}
+                      >
+                        {monitoredCryptos[crypto] ? 'Stop Monitoring' : 'Monitor'}
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!contracts[crypto]) return;
+                          try {
+                            await contracts[crypto].subscribe({
+                              value: ethers.parseEther("0.000001")
+                            });
+                            await contracts[crypto].updateThresholds(
+                              ethers.parseUnits("0", 18),
+                              ethers.parseUnits("0", 18)
+                            );
+                            setMonitoredCryptos(prev => ({
+                              ...prev,
+                              [crypto]: true
+                            }));
+                          } catch (error) {
+                            console.error("Simulation error:", error);
+                            alert("Failed to simulate. Check console for details.");
+                          }
+                        }}
+                        className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition-colors"
+                      >
+                        Simulate
+                      </button>
+                    </>
                   )}
                 </div>
               </div>
