@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-import "../../lib/reactive-lib/src/abstract-base/AbstractReactive.sol";
-import "../../lib/reactive-lib/src/interfaces/IReactive.sol";
+import "./interfaces/IReactive.sol";
+import "./abstract/AbstractReactive.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
 import "./PriceFeedOracle.sol";
@@ -39,17 +40,8 @@ contract ReactiveBuySell is AbstractReactive {
         buyThreshold = _buyThreshold;
         sellThreshold = _sellThreshold;
 
-        // Subscribe to reactive events
-        try service.subscribe(
-            block.chainid,
-            address(0),
-            uint256(0),
-            uint256(0),
-            uint256(0),
-            uint256(0)
-        ) {
-        } catch {
-        }
+        // Initialize service as deployer (will be updated when subscribed)
+        service = msg.sender;
     }
 
     function react(IReactive.LogRecord calldata) external override {

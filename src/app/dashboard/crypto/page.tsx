@@ -1,6 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { CryptoIcon } from '@/components/ui/CryptoIcon';
+import { ethers } from 'ethers';
+import ReactiveBuySell from '../../../contracts/ReactiveBuySell.json';
+import deploymentInfo from '../../../contracts/deployment.json';
+
+type SupportedCrypto = 'bitcoin' | 'ethereum';
+
+const isSupportedCrypto = (str: string): str is SupportedCrypto => 
+  str === 'bitcoin' || str === 'ethereum';
 
 declare global {
   interface Window {
@@ -36,25 +44,50 @@ export default function CryptoPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [monitoredCryptos, setMonitoredCryptos] = useState<{[key: string]: boolean}>({});
+  const [contracts, setContracts] = useState<{[key: string]: ethers.Contract}>({});
 
   const disconnectMetamask = async () => {
     setAccount("");
     setBalance("");
+    setMonitoredCryptos({});
+    setContracts({});
 
     if (window.ethereum) {
       try {
-        // This requests updated permissions. The user can revoke "eth_accounts" permission in MetaMask if they wish.
-        // Note: There's no direct way for a dApp to forcibly log out of MetaMask, as the user controls permissions.
         await window.ethereum.request({
           method: 'wallet_requestPermissions',
-          params: [
-            {
-              eth_accounts: {}
-            }
-          ]
+          params: [{ eth_accounts: {} }]
         });
       } catch (error) {
         console.error(error);
+      }
+    }
+  };
+
+  const switchToSepolia = async () => {
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0xaa36a7' }], // Sepolia chainId
+      });
+    } catch (error: any) {
+      // If the chain hasn't been added to MetaMask
+      if (error.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{
+            chainId: '0xaa36a7',
+            chainName: 'Sepolia',
+            nativeCurrency: {
+              name: 'Sepolia ETH',
+              symbol: 'ETH',
+              decimals: 18
+            },
+            rpcUrls: ['https://sepolia.infura.io/v3/0b628bfdb1bf4499ab42192408b20ea0'],
+            blockExplorerUrls: ['https://sepolia.etherscan.io']
+          }]
+        });
       }
     }
   };
@@ -65,6 +98,9 @@ export default function CryptoPage() {
       return;
     }
     try {
+      // First switch to Sepolia
+      await switchToSepolia();
+      
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
@@ -79,21 +115,95 @@ export default function CryptoPage() {
       }
     } catch (error) {
       console.error(error);
+      alert("Please make sure you're connected to Sepolia network");
     }
   };
+
+  interface ThresholdResponse {
+    crypto_id: string;
+    threshold: {
+      buy: number;
+      sell: number;
+    };
+    explanation: string;
+  }
 
   const handleAnalyze = async (crypto: string) => {
     setModalOpen(true);
     setModalLoading(true);
     try {
       const res = await fetch(`http://127.0.0.1:8000/threshold/${crypto}`);
-      const data = await res.json();
+      const data = await res.json() as ThresholdResponse;
       setAnalysisResult(data);
     } catch (error) {
       console.error(error);
       setAnalysisResult({ error: 'Failed to fetch analysis.' });
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const initializeContracts = async () => {
+    if (!window.ethereum || !account) return;
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    
+    const newContracts: {[key: string]: ethers.Contract} = {};
+    const monitored: {[key: string]: boolean} = {};
+
+    // Initialize contract instances for supported cryptocurrencies
+    for (const [crypto, address] of Object.entries(deploymentInfo.reactiveBuySell)) {
+      if (isSupportedCrypto(crypto)) {
+        const contract = new ethers.Contract(address, ReactiveBuySell.abi, signer);
+        newContracts[crypto] = contract;
+        
+        try {
+          // Check if contract is actively monitoring by checking its subscription status
+          const isSubscribed = await contract.isSubscribed();
+          monitored[crypto] = isSubscribed;
+        } catch (error) {
+          console.error(`Error checking subscription for ${crypto}:`, error);
+          monitored[crypto] = false;
+        }
+      }
+    }
+
+    setContracts(newContracts);
+    setMonitoredCryptos(monitored);
+  };
+
+  const toggleMonitoring = async (crypto: string) => {
+    if (!account || !isSupportedCrypto(crypto) || !contracts[crypto]) return;
+
+    try {
+      const contract = contracts[crypto];
+      const thresholdData = await fetch(`http://127.0.0.1:8000/threshold/${crypto}`);
+      const { threshold } = await thresholdData.json() as ThresholdResponse;
+
+      if (!monitoredCryptos[crypto]) {
+        // Start monitoring
+        await contract.subscribe({
+          value: ethers.utils.parseEther("0.1") // Initial ETH for trading
+        });
+        await contract.updateThresholds(
+          ethers.utils.parseUnits(threshold.buy.toString(), 18),
+          ethers.utils.parseUnits(threshold.sell.toString(), 18)
+        );
+      } else {
+        // Stop monitoring
+        await contract.unsubscribe();
+      }
+
+      // Update monitoring status
+      setMonitoredCryptos(prev => ({
+        ...prev,
+        [crypto]: !prev[crypto]
+      }));
+
+    } catch (error) {
+      console.error("Error toggling monitoring:", error);
+      alert("Failed to toggle monitoring. Please check the console for details.");
     }
   };
 
@@ -117,7 +227,8 @@ export default function CryptoPage() {
       }
     };
     checkWalletConnection();
-  }, []);
+    initializeContracts();
+  }, [account]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -173,7 +284,12 @@ export default function CryptoPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(cryptoData).map(([crypto, data]) => {
-            if (!data?.usd) return null; // Skip if data is invalid
+            if (!data?.usd) return null;
+            
+            const contractAddress = isSupportedCrypto(crypto) ? 
+              deploymentInfo.reactiveBuySell[crypto] : undefined;
+            const isSupported = contractAddress && contractAddress !== "";
+            
             return (
               <div key={crypto} className="bg-white p-4 rounded-lg shadow">
                 <div className="flex items-center gap-2">
@@ -188,13 +304,25 @@ export default function CryptoPage() {
                     {data.usd_24h_change?.toFixed(2) || '0.00'}% (24h)
                   </p>
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 flex gap-2">
                   <button
                     onClick={() => handleAnalyze(crypto)}
                     className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition-colors"
                   >
                     Analyze
                   </button>
+                  {isSupported && account && (
+                    <button
+                      onClick={() => toggleMonitoring(crypto)}
+                      className={`px-4 py-2 rounded transition-colors ${
+                        monitoredCryptos[crypto]
+                          ? 'bg-red-600 hover:bg-red-700'
+                          : 'bg-green-600 hover:bg-green-700'
+                      } text-white`}
+                    >
+                      {monitoredCryptos[crypto] ? 'Stop Monitoring' : 'Monitor'}
+                    </button>
+                  )}
                 </div>
               </div>
             );

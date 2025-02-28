@@ -1,14 +1,24 @@
-import { ethers } from 'ethers';
-import axios from 'axios';
+import { ethers } from "hardhat";
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { Contract } from "@ethersproject/contracts";
+import { BigNumber } from "@ethersproject/bignumber";
+import { utils } from "ethers";
 
 // Contract ABI fragments we need
-const ORACLE_ABI = [
-    "function updatePrice(uint256 _price) external",
-    "function getPrice() external view returns (uint256, bool)",
-    "function getLastUpdateTimestamp() external view returns (uint256)"
+const CHAINLINK_ABI = [
+    "function latestRoundData() external view returns (uint80 roundId, int256 answer, uint256 startedAt, uint256 updatedAt, uint80 answeredInRound)",
+    "function decimals() external view returns (uint8)"
 ];
 
-interface PriceData {
+interface ChainlinkPriceData {
+    roundId: BigNumber;
+    answer: BigNumber;
+    startedAt: BigNumber;
+    updatedAt: BigNumber;
+    answeredInRound: BigNumber;
+}
+
+interface PriceFeedData {
     price: number;
     threshold: {
         buy: number;
@@ -17,54 +27,49 @@ interface PriceData {
 }
 
 export class PriceUpdateService {
-    private provider: ethers.providers.Provider;
-    private wallet: ethers.Wallet;
-    private oracle: ethers.Contract;
-    private interval?: NodeJS.Timeout;
+    private chainlinkFeed: Contract;
     private cryptoName: string;
+    private interval?: NodeJS.Timeout;
 
     constructor(
-        provider: string,
-        oracleAddress: string,
-        privateKey: string,
+        chainlinkAddress: string,
         cryptoName: string,
-        baseApiUrl: string = 'http://localhost:8000'
+        provider?: JsonRpcProvider
     ) {
-        this.provider = new ethers.providers.JsonRpcProvider(provider);
-        this.wallet = new ethers.Wallet(privateKey, this.provider);
-        this.oracle = new ethers.Contract(oracleAddress, ORACLE_ABI, this.wallet);
+        const defaultProvider = new JsonRpcProvider(
+            "https://sepolia.infura.io/v3/0b628bfdb1bf4499ab42192408b20ea0"
+        );
+        this.chainlinkFeed = new Contract(
+            chainlinkAddress, 
+            CHAINLINK_ABI, 
+            provider || defaultProvider
+        );
         this.cryptoName = cryptoName.toLowerCase();
     }
 
-    private async fetchThresholdData(): Promise<PriceData> {
+    private async getLatestPrice(): Promise<number> {
         try {
-            const response = await axios.get<PriceData>(`http://localhost:8000/threshold/${this.cryptoName}`);
-            if (!response.data || !response.data.price || !response.data.threshold) {
-                throw new Error('Invalid data from API');
-            }
-            return response.data;
+            const decimals = await this.chainlinkFeed.decimals();
+            const data: ChainlinkPriceData = await this.chainlinkFeed.latestRoundData();
+            return parseFloat(utils.formatUnits(data.answer, decimals));
         } catch (error) {
-            console.error('Error fetching threshold data:', error);
+            console.error('Error fetching price data:', error);
             throw error;
         }
     }
 
-    async updatePrice(): Promise<void> {
+    async monitorPrice(): Promise<void> {
         try {
-            const data = await this.fetchThresholdData();
-            const priceInWei = ethers.utils.parseUnits(data.price.toString(), 18);
-            const tx = await this.oracle.updatePrice(priceInWei);
-            await tx.wait();
-            console.log(`Price updated for ${this.cryptoName}: ${data.price}`);
-            console.log(`Thresholds - Buy: ${data.threshold.buy}, Sell: ${data.threshold.sell}`);
+            const price = await this.getLatestPrice();
+            console.log(`Current ${this.cryptoName} price: $${price}`);
         } catch (error) {
-            console.error('Error updating price:', error);
+            console.error('Error monitoring price:', error);
             throw error;
         }
     }
 
     async start(updateInterval: number = 60000): Promise<void> {
-        console.log(`Price Update Service started for ${this.cryptoName}`);
+        console.log(`Price monitoring service started for ${this.cryptoName}`);
         
         // Clear any existing interval
         if (this.interval) {
@@ -73,7 +78,7 @@ export class PriceUpdateService {
 
         this.interval = setInterval(async () => {
             try {
-                await this.updatePrice();
+                await this.monitorPrice();
             } catch (error) {
                 console.error('Update cycle failed:', error);
             }
@@ -84,7 +89,7 @@ export class PriceUpdateService {
         if (this.interval) {
             clearInterval(this.interval);
             this.interval = undefined;
-            console.log(`Price Update Service stopped for ${this.cryptoName}`);
+            console.log(`Price monitoring service stopped for ${this.cryptoName}`);
         }
     }
 }
