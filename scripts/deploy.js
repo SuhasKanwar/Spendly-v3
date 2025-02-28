@@ -1,6 +1,5 @@
 const { ethers } = require("hardhat");
 const { writeFileSync } = require('fs');
-const { parseUnits } = require('ethers');
 
 async function main() {
     console.log("Starting deployment...");
@@ -46,8 +45,8 @@ async function main() {
         console.log(`Deploying ReactiveBuySell for ${crypto}...`);
         try {
             // Default thresholds (since API might not be available during deployment)
-            const buyThreshold = parseUnits("0.95", 18); // 5% below current price
-            const sellThreshold = parseUnits("1.05", 18); // 5% above current price
+            const buyThreshold = ethers.parseUnits("0.95", 18); // 5% below current price
+            const sellThreshold = ethers.parseUnits("1.05", 18); // 5% above current price
 
             const reactiveBuySell = await ReactiveBuySell.deploy(
                 UNISWAP_ROUTER,
