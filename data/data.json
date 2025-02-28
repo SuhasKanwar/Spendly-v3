@@ -1,0 +1,251 @@
+{
+  "username": "Prosper",
+  "email": "suhas.kanwar@gmail.com",
+  "password": "suhas#2004",
+  "otp": "",
+  "otpExpiry": "2025-02-06 22:39:50.053336",
+  "isVerified": false,
+  "banksCount": 1,
+  "banks": [
+    {
+      "accountHolderName": "Kapil  Gangwar",
+      "accountNumber": "91076349081",
+      "accountType": "Savings",
+      "bankName": "State",
+      "transactionsCount": 33,
+      "transactions": [
+        {
+          "date": "2025-02-06 22:39:50.052336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/421954295736/DEVANSH",
+          "transactionType": "debit",
+          "balance": -4897691072088.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/622292305453/KAMAL",
+          "transactionType": "debit",
+          "balance": -9795381234183.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/422465854386/MOHD",
+          "transactionType": "debit",
+          "balance": -14693071396278.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/422462066678/Delhi",
+          "transactionType": "debit",
+          "balance": -19590761558373.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/904522021523/MEHUL",
+          "transactionType": "debit",
+          "balance": -24488451720468.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/459112667750/SHRI",
+          "transactionType": "debit",
+          "balance": -29386142882563.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897733162090.0,
+          "description": "TRANSFER FROM 4897733162090 -UPI/CR/359077147060/MEHUL",
+          "transactionType": "credit",
+          "balance": -24488409720473.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897693162093.0,
+          "description": "TRANSFER TO 4897693162093 -UPI/DR/422736556392/Ashok",
+          "transactionType": "debit",
+          "balance": -29386102882566.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897695162091.0,
+          "description": "TRANSFER TO 4897695162091 -UPI/DR/422992240783/Jio",
+          "transactionType": "debit",
+          "balance": -34283798044657.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897696162090.0,
+          "description": "TRANSFER TO 4897696162090 -UPI/DR/423062648790/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -39181494206747.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897696162090.0,
+          "description": "TRANSFER TO 4897696162090 -UPI/DR/459613522574/Mr",
+          "transactionType": "debit",
+          "balance": -44079190368837.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897732162091.0,
+          "description": "TRANSFER FROM 4897732162091 -UPI/CR/380148073351/SONAM/UTIB/",
+          "transactionType": "credit",
+          "balance": -39181458206746.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423190106101/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -44079148368841.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423137985163/Haldiram/YES",
+          "transactionType": "debit",
+          "balance": -48976838530936.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423183166785/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -53874528693031.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423182417540/ANUJ",
+          "transactionType": "debit",
+          "balance": -58772218855126.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423197884200/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -63669909017221.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423121501143/Archaeol/ICIC/",
+          "transactionType": "debit",
+          "balance": -68567599179316.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423128779061/Mr RAM",
+          "transactionType": "debit",
+          "balance": -73465289341411.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423161752284/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -78362979503506.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/423210847420/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -83260670665601.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/423256460234/DHARMVEE/S",
+          "transactionType": "debit",
+          "balance": -88158361827696.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/459832217728/SHADAB",
+          "transactionType": "debit",
+          "balance": -93056052989791.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/423219764736/DMRC/ICIC/cf.",
+          "transactionType": "debit",
+          "balance": -97953744151886.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897693162093.0,
+          "description": "TRANSFER TO 4897693162093 -UPI/DR/687670533184/Manthan",
+          "transactionType": "debit",
+          "balance": -102851437313979.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897693162093.0,
+          "description": "TRANSFER TO 4897693162093 -UPI/DR/423413724761/BML",
+          "transactionType": "debit",
+          "balance": -107749130476072.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897694162092.0,
+          "description": "TRANSFER TO 4897694162092 -UPI/DR/423508155684/Ashok",
+          "transactionType": "debit",
+          "balance": -112646824638164.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897695162091.0,
+          "description": "TRANSFER TO 4897695162091 -UPI/DR/665838664796/Indian",
+          "transactionType": "debit",
+          "balance": -117544519800255.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897695162091.0,
+          "description": "TRANSFER TO 4897695162091 -UPI/DR/053800352728/Indian",
+          "transactionType": "debit",
+          "balance": -122442214962346.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897696162090.0,
+          "description": "TRANSFER TO 4897696162090 -UPI/DR/423786197740/UTKARSH",
+          "transactionType": "debit",
+          "balance": -127339911124436.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897696162090.0,
+          "description": "TRANSFER TO 4897696162090 -UPI/DR/423770272846/Ashok",
+          "transactionType": "debit",
+          "balance": -132237607286526.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897690162095.0,
+          "description": "TRANSFER TO 4897690162095 -UPI/DR/423825610918/Ashok",
+          "transactionType": "debit",
+          "balance": -137135297448621.45
+        },
+        {
+          "date": "2025-02-06 22:39:50.053336",
+          "amount": 4897691162095.0,
+          "description": "TRANSFER TO 4897691162095 -UPI/DR/220611294039/MEHUL",
+          "transactionType": "debit",
+          "balance": -142032988610716.44
+        }
+      ]
+    }
+  ]
+}

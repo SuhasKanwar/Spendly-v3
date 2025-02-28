@@ -1,0 +1,6 @@
+[submodule "lib/hackathon"]
+	path = lib/hackathon
+	url = https://github.com/Reactive-Network/hackathon
+[submodule "lib/reactive-lib"]
+	path = lib/reactive-lib
+	url = https://github.com/Reactive-Network/reactive-lib
