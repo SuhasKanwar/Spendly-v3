@@ -4,6 +4,7 @@
     "ethereum": "0x520738CFfEAbAC86F387CF782566285387667873"
   },
   "reactiveBuySell": {
+    "bitcoin": "0x949A615ecF5d9b2239C85486421DE60Ccebd2c3E",
     "ethereum": "0xCcEeCE1AFD712B29A9B6D07272029D3205301530"
   }
 }

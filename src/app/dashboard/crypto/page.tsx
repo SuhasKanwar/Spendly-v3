@@ -7,6 +7,14 @@ import deploymentInfo from '../../../contracts/deployment.json';
 
 type SupportedCrypto = 'bitcoin' | 'ethereum';
 
+interface DeploymentInfo {
+  reactiveBuySell: {
+    [key in SupportedCrypto]: string;
+  };
+}
+
+const typedDeploymentInfo = deploymentInfo as DeploymentInfo;
+
 const isSupportedCrypto = (str: string): str is SupportedCrypto => 
   str === 'bitcoin' || str === 'ethereum';
 
@@ -146,14 +154,14 @@ export default function CryptoPage() {
   const initializeContracts = async () => {
     if (!window.ethereum || !account) return;
 
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const signer = await provider.getSigner();
     
     const newContracts: {[key: string]: ethers.Contract} = {};
     const monitored: {[key: string]: boolean} = {};
 
     // Initialize contract instances for supported cryptocurrencies
-    for (const [crypto, address] of Object.entries(deploymentInfo.reactiveBuySell)) {
+    for (const [crypto, address] of Object.entries(typedDeploymentInfo.reactiveBuySell)) {
       if (isSupportedCrypto(crypto)) {
         const contract = new ethers.Contract(address, ReactiveBuySell.abi, signer);
         newContracts[crypto] = contract;
@@ -184,11 +192,11 @@ export default function CryptoPage() {
       if (!monitoredCryptos[crypto]) {
         // Start monitoring
         await contract.subscribe({
-          value: ethers.utils.parseEther("0.1") // Initial ETH for trading
+          value: ethers.parseEther("0.0001") // Initial ETH for trading
         });
         await contract.updateThresholds(
-          ethers.utils.parseUnits(threshold.buy.toString(), 18),
-          ethers.utils.parseUnits(threshold.sell.toString(), 18)
+          ethers.parseUnits(threshold.buy.toString(), 18),
+          ethers.parseUnits(threshold.sell.toString(), 18)
         );
       } else {
         // Stop monitoring
@@ -287,7 +295,7 @@ export default function CryptoPage() {
             if (!data?.usd) return null;
             
             const contractAddress = isSupportedCrypto(crypto) ? 
-              deploymentInfo.reactiveBuySell[crypto] : undefined;
+              typedDeploymentInfo.reactiveBuySell[crypto] : undefined;
             const isSupported = contractAddress && contractAddress !== "";
             
             return (
